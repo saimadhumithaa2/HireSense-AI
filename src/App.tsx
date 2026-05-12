@@ -6,7 +6,7 @@ import {
   Camera, Play, Square, ShieldCheck,
   Loader2, Target, RefreshCw,
   History, Settings, ChevronRight, AlertCircle, Activity,
-  Briefcase, Cpu
+  Briefcase, Cpu, LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -793,6 +793,7 @@ const SettingsPage = () => {
   );
 };
 function App() {
+  const LogOut = () => { console.log("Logging out..."); window.location.reload(); };
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
