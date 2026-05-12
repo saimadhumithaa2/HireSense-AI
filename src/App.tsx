@@ -795,106 +795,108 @@ const SettingsPage = () => {
 
 export default function App() {
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
-const [isOnline, setIsOnline] = useState(navigator.onLine);
-const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
-const [resume, setResume] = useState(() => localStorage.getItem('resume_text') || '');
-const [expertMode, setExpertMode] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
+  const [resume, setResume] = useState(() => localStorage.getItem('resume_text') || '');
+  const [expertMode, setExpertMode] = useState(false);
 
-useEffect(() => {
-  const handleOnline = () => setIsOnline(true);
-  const handleOffline = () => setIsOnline(false);
-  window.addEventListener('online', handleOnline);
-  window.addEventListener('offline', handleOffline);
-  return () => {
-    window.removeEventListener('online', handleOnline);
-    window.removeEventListener('offline', handleOffline);
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const checkDb = async () => {
+      try {
+        const { error } = await supabase.from('sessions').select('id').limit(1);
+        setDbConnected(!error);
+      } catch {
+        setDbConnected(false);
+      }
+    };
+    if (isOnline) checkDb();
+  }, [isOnline]);
+
+  const login = () => {
+    const mockUser = { name: 'Candidate', expertMode, setExpertMode };
+    setUser(mockUser);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    toast.success("AUTHENTICATION_GRANTED");
   };
-}, []);
 
-useEffect(() => {
-  const checkDb = async () => {
-    try {
-      const { error } = await supabase.from('sessions').select('id').limit(1);
-      setDbConnected(!error);
-    } catch {
-      setDbConnected(false);
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
   };
-  if (isOnline) checkDb();
-}, [isOnline]);
 
-const login = () => {
-  const mockUser = { name: 'Candidate', expertMode, setExpertMode };
-  setUser(mockUser);
-  localStorage.setItem('user', JSON.stringify(mockUser));
-  toast.success("AUTHENTICATION_GRANTED");
-};
-
-const logout = () => {
-  setUser(null);
-  localStorage.removeItem('user');
-};
-
-// Environment Guard
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_GEMINI_API_KEY) {
-  return (
-    <div className="h-screen flex items-center justify-center bg-[#0A0A0A] p-12">
-      <div className="industrial-card p-12 max-w-md w-full border-red-500/20">
-        <AlertCircle size={48} strokeWidth={1} className="text-red-500 mb-8" />
-        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">Config_Required</h2>
-        <p className="text-slate-600 text-xs mono leading-relaxed uppercase tracking-widest">Missing environment variables. Ensure VITE_SUPABASE_URL and VITE_GEMINI_API_KEY are defined in .env.</p>
-      </div>
-    </div>
-  );
-}
-
-return (
-  <AuthContext.Provider value={{ user, login, logout, expertMode, setExpertMode }}>
-    <ResumeContext.Provider value={{ resume, setResume }}>
-      <Router>
-        <div className="min-h-screen bg-[#0A0A0A] font-sans text-slate-400 selection:bg-[#CD7F32]/30">
-          <Toaster position="top-right" toastOptions={{
-            style: { background: '#111111', color: '#fff', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' }
-          }} />
-
-          {user ? (
-            <div className="flex">
-              <Sidebar dbConnected={dbConnected} isOnline={isOnline} />
-              <main className="flex-1 ml-64 p-16 min-h-screen">
-                <div className="max-w-7xl mx-auto">
-                  <AnimatePresence mode="wait">
-                    <Routes>
-                      <Route path="/" element={<CareerHub />} />
-                      <Route path="/practice" element={<SimulationChamber />} />
-                      <Route path="/analytics" element={<AnalyticsPage />} />
-                      <Route path="/history" element={<HistoryPage />} />
-                      <Route path="/settings" element={<SettingsPage />} />
-                      <Route path="*" element={<Navigate to="/" />} />
-                    </Routes>
-                  </AnimatePresence>
-                </div>
-              </main>
-            </div>
-          ) : (
-            <div className="h-screen flex items-center justify-center bg-[#0A0A0A]">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="industrial-card p-16 max-w-lg w-full text-center space-y-10">
-                <div className="w-16 h-16 bg-[#CD7F32] rounded-[4px] flex items-center justify-center mx-auto">
-                  <ShieldCheck size={32} strokeWidth={1.5} className="text-[#0A0A0A]" />
-                </div>
-                <div>
-                  <h1 className="text-5xl font-black text-white tracking-[-0.08em] uppercase italic mb-2">HireSense</h1>
-                  <p className="text-slate-600 font-bold text-[10px] mono uppercase tracking-[0.4em]">Enterprise_Intelligence_v4.0</p>
-                </div>
-                <button onClick={login} className="w-full bg-[#CD7F32] hover:bg-[#b06d2b] text-[#0A0A0A] py-5 rounded-[4px] font-black text-[11px] uppercase tracking-[0.3em] transition-all active:scale-[0.98] flex items-center justify-center gap-4">
-                  INITIALIZE_UPLINK <ChevronRight size={16} strokeWidth={1} />
-                </button>
-              </motion.div>
-
-            </div>
-          )}
+  // Environment Guard
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_GEMINI_API_KEY) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#0A0A0A] p-12">
+        <div className="industrial-card p-12 max-w-md w-full border-red-500/20">
+          <AlertCircle size={48} strokeWidth={1} className="text-red-500 mb-8" />
+          <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">Config_Required</h2>
+          <p className="text-slate-600 text-xs mono leading-relaxed uppercase tracking-widest">Missing environment variables. Ensure VITE_SUPABASE_URL and VITE_GEMINI_API_KEY are defined in .env.</p>
         </div>
-      </Router>
-    </ResumeContext.Provider>
-  </AuthContext.Provider>
+      </div>
+    );
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, expertMode, setExpertMode }}>
+      <ResumeContext.Provider value={{ resume, setResume }}>
+        <Router>
+          <div className="min-h-screen bg-[#0A0A0A] font-sans text-slate-400 selection:bg-[#CD7F32]/30">
+            <Toaster position="top-right" toastOptions={{
+              style: { background: '#111111', color: '#fff', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' }
+            }} />
+
+            {user ? (
+              <div className="flex">
+                <Sidebar dbConnected={dbConnected} isOnline={isOnline} />
+                <main className="flex-1 ml-64 p-16 min-h-screen">
+                  <div className="max-w-7xl mx-auto">
+                    <AnimatePresence mode="wait">
+                      <Routes>
+                        <Route path="/" element={<CareerHub />} />
+                        <Route path="/practice" element={<SimulationChamber />} />
+                        <Route path="/analytics" element={<AnalyticsPage />} />
+                        <Route path="/history" element={<HistoryPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="*" element={<Navigate to="/" />} />
+                      </Routes>
+                    </AnimatePresence>
+                  </div>
+                </main>
+              </div>
+            ) : (
+              <div className="h-screen flex items-center justify-center bg-[#0A0A0A]">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="industrial-card p-16 max-w-lg w-full text-center space-y-10">
+                  <div className="w-16 h-16 bg-[#CD7F32] rounded-[4px] flex items-center justify-center mx-auto">
+                    <ShieldCheck size={32} strokeWidth={1.5} className="text-[#0A0A0A]" />
+                  </div>
+                  <div>
+                    <h1 className="text-5xl font-black text-white tracking-[-0.08em] uppercase italic mb-2">HireSense</h1>
+                    <p className="text-slate-600 font-bold text-[10px] mono uppercase tracking-[0.4em]">Enterprise_Intelligence_v4.0</p>
+                  </div>
+                  <button onClick={login} className="w-full bg-[#CD7F32] hover:bg-[#b06d2b] text-[#0A0A0A] py-5 rounded-[4px] font-black text-[11px] uppercase tracking-[0.3em] transition-all active:scale-[0.98] flex items-center justify-center gap-4">
+                    INITIALIZE_UPLINK <ChevronRight size={16} strokeWidth={1} />
+                  </button>
+                </motion.div>
+
+              </div>
+            )}
+          </div>
+        </Router>
+      </ResumeContext.Provider>
+    </AuthContext.Provider>
   );
-}
+};
+
+export default App;
