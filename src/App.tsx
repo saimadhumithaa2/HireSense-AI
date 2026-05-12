@@ -48,7 +48,7 @@ const playSFX = (type: 'start' | 'success' | 'error') => {
 
 // --- COMPONENTS ---
 
-const Sidebar = ({ dbConnected }: { dbConnected: boolean | null }) => {
+const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnline: boolean }) => {
   const location = useLocation();
   const { user, logout } = useContext(AuthContext);
 
@@ -71,9 +71,9 @@ const Sidebar = ({ dbConnected }: { dbConnected: boolean | null }) => {
         </div>
         
         <div className="flex items-center gap-2">
-          <div className={`w-1.5 h-1.5 rounded-full ${dbConnected ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-          <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-500">
-            {dbConnected ? 'Network: Online' : 'Network: Offline'}
+          <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? (dbConnected ? 'bg-emerald-500' : 'bg-amber-500') : 'bg-red-500'}`} />
+          <span className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">
+            {!isOnline ? 'Network: Offline' : (dbConnected ? 'Network: Online' : 'Cloud: Sync_Error')}
           </span>
         </div>
       </div>
@@ -794,11 +794,22 @@ const SettingsPage = () => {
 
 // --- MAIN APP ---
 
-export default function App() {
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
   const [resume, setResume] = useState(() => localStorage.getItem('resume_text') || '');
   const [expertMode, setExpertMode] = useState(false);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const checkDb = async () => {
@@ -809,8 +820,8 @@ export default function App() {
         setDbConnected(false);
       }
     };
-    checkDb();
-  }, []);
+    if (isOnline) checkDb();
+  }, [isOnline]);
 
   const login = () => {
     const mockUser = { name: 'Candidate', expertMode, setExpertMode };
@@ -848,7 +859,7 @@ export default function App() {
             
             {user ? (
               <div className="flex">
-                <Sidebar dbConnected={dbConnected} />
+                <Sidebar dbConnected={dbConnected} isOnline={isOnline} />
                 <main className="flex-1 ml-64 p-16 min-h-screen">
                   <div className="max-w-7xl mx-auto">
                     <AnimatePresence mode="wait">
