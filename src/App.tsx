@@ -792,9 +792,6 @@ const SettingsPage = () => {
     </motion.div>
   );
 };
-
-// --- MAIN APP ---
-
 function App() {
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -900,5 +897,4 @@ function App() {
     </AuthContext.Provider>
   );
 };
-
 export default App;
