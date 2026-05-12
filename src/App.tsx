@@ -1,38 +1,40 @@
-import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
+import { useState, useRef, useEffect, createContext, useContext } from 'react';
 import {
   BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate
 } from 'react-router-dom';
 import {
-  Camera, Play, Square, MessageSquare, BarChart3, ShieldCheck,
-  Loader2, Sparkles, Trophy, Target, BookOpen, RefreshCw,
-  LayoutDashboard, History, Settings, LogOut, ChevronRight,
-  TrendingUp, Clock, Award, User, Sun, Moon, AlertCircle, Activity,
-  FileText, Zap, Brain, Briefcase, Terminal, Cpu, Database, Network
+  Camera, Play, Square, ShieldCheck,
+  Loader2, Target, RefreshCw,
+  History, Settings, ChevronRight, AlertCircle, Activity,
+  Briefcase, Cpu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  PieChart, Pie, Cell, AreaChart, Area
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  AreaChart, Area
 } from 'recharts';
-import { analyzeInterview, type InterviewAnalysis, type HistoryContext } from './services/aiService';
+import { analyzeInterview, type HistoryContext } from './services/aiService';
 import { supabase } from './lib/supabaseClient';
 import toast, { Toaster } from 'react-hot-toast';
 
 // --- CONTEXTS ---
-const ThemeContext = createContext({ theme: 'dark', toggleTheme: () => { } });
-const AuthContext = createContext({
+interface AuthContextType {
+  user: any;
+  login: () => void;
+  logout: () => void;
+  expertMode: boolean;
+  setExpertMode: (val: boolean) => void;
+}
+
+const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => { },
   logout: () => { },
   expertMode: false,
-  setExpertMode: (val: boolean) => { }
+  setExpertMode: () => { }
 });
-const ResumeContext = createContext({ resume: '', setResume: (val: string) => { } });
 
-const useResume = () => useContext(ResumeContext);
-const useAuth = () => useContext(AuthContext);
-const useTheme = () => useContext(ThemeContext);
+const ResumeContext = createContext({ resume: '', setResume: (val: string) => { } });
 
 // --- UTILS ---
 const playSFX = (type: 'start' | 'success' | 'error') => {
@@ -793,7 +795,7 @@ const SettingsPage = () => {
 
 // --- MAIN APP ---
 
-export default function App() {
+function App() {
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
