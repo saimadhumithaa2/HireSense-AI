@@ -37,6 +37,15 @@ const AuthContext = createContext<AuthContextType>({
 const ResumeContext = createContext({ resume: '', setResume: (val: string) => { } });
 
 // --- UTILS ---
+const Switch = ({ checked, onCheckedChange }: { checked: boolean, onCheckedChange: (val: boolean) => void }) => (
+  <button
+    onClick={() => onCheckedChange(!checked)}
+    className={`w-8 h-4 rounded-full relative transition-all ${checked ? 'bg-[#CD7F32]' : 'bg-slate-800'}`}
+  >
+    <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${checked ? 'left-4.5' : 'left-0.5'}`} />
+  </button>
+);
+
 const playSFX = (type: 'start' | 'success' | 'error') => {
   const sounds = {
     start: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
@@ -99,12 +108,10 @@ const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnl
       <div className="p-4 border-t border-white/5 space-y-4">
         <div className="flex items-center justify-between px-4 py-2 bg-white/5 rounded-[4px] border border-white/5">
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Expert_Mode</span>
-          <button
-            onClick={() => setIsExpertMode(!isExpertMode)}
-            className={`w-8 h-4 rounded-full relative transition-all ${isExpertMode ? 'bg-[#CD7F32]' : 'bg-slate-800'}`}
-          >
-            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${isExpertMode ? 'left-4.5' : 'left-0.5'}`} />
-          </button>
+          <Switch
+            checked={isExpertMode}
+            onCheckedChange={(checked) => setIsExpertMode(checked)}
+          />
         </div>
 
         <button onClick={logout} className="flex items-center gap-3 px-4 py-3 w-full text-slate-600 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest">
@@ -252,7 +259,7 @@ const CareerHub = () => {
           <div className="relative z-10">
             <Target size={20} strokeWidth={2} className="text-[#0A0A0A] mb-6" />
             <p className="text-[#0A0A0A]/60 font-black text-[10px] uppercase tracking-widest">Current_Objective</p>
-            <p className="text-xl font-black text-[#00f2ff] mt-2 leading-tight uppercase tracking-tight">Optimize System Architecture</p>
+            <p className="text-xl text-white font-bold opacity-100 mt-2 leading-tight uppercase tracking-tight">Optimize System Architecture</p>
           </div>
           <div className="absolute -right-4 -bottom-4 opacity-10">
             <Network size={120} />
@@ -800,6 +807,8 @@ function App() {
   const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
   const [resume, setResume] = useState(() => localStorage.getItem('resume_text') || '');
   const [isExpertMode, setIsExpertMode] = useState(false);
+
+  console.log('Expert Mode:', isExpertMode);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
