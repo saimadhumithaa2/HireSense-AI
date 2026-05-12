@@ -6,12 +6,12 @@ import {
   Camera, Play, Square, ShieldCheck,
   Loader2, Target, RefreshCw,
   History, Settings, ChevronRight, AlertCircle, Activity,
-  Briefcase, Cpu, LogOut
+  Briefcase, Cpu, LogOut, Zap, Clock, Network
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area
+  AreaChart, Area, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar
 } from 'recharts';
 import { analyzeInterview, type HistoryContext } from './services/aiService';
 import { supabase } from './lib/supabaseClient';
