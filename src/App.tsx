@@ -22,16 +22,16 @@ interface AuthContextType {
   user: any;
   login: () => void;
   logout: () => void;
-  expertMode: boolean;
-  setExpertMode: (val: boolean) => void;
+  isExpertMode: boolean;
+  setIsExpertMode: (val: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   login: () => { },
   logout: () => { },
-  expertMode: false,
-  setExpertMode: () => { }
+  isExpertMode: false,
+  setIsExpertMode: () => { }
 });
 
 const ResumeContext = createContext({ resume: '', setResume: (val: string) => { } });
@@ -52,7 +52,7 @@ const playSFX = (type: 'start' | 'success' | 'error') => {
 
 const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnline: boolean }) => {
   const location = useLocation();
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, isExpertMode, setIsExpertMode } = useContext(AuthContext);
 
   const navItems = [
     { name: 'CAREER_HUB', icon: Briefcase, path: '/' },
@@ -63,7 +63,7 @@ const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnl
   ];
 
   return (
-    <aside className="w-64 bg-[#0A0A0A] border-r border-white/5 flex flex-col h-screen fixed left-0 top-0 z-20">
+    <aside className={`w-64 bg-[#0A0A0A] border-r border-white/5 flex flex-col h-screen fixed left-0 top-0 z-20 transition-all duration-500 ${isExpertMode ? 'shadow-[0_0_40px_rgba(205,127,50,0.15)] border-r-[#CD7F32]/30' : ''}`}>
       <div className="p-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-8 h-8 bg-[#CD7F32] rounded-[4px] flex items-center justify-center">
@@ -100,10 +100,10 @@ const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnl
         <div className="flex items-center justify-between px-4 py-2 bg-white/5 rounded-[4px] border border-white/5">
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Expert_Mode</span>
           <button
-            onClick={() => user?.setExpertMode(!user?.expertMode)}
-            className={`w-8 h-4 rounded-full relative transition-all ${user?.expertMode ? 'bg-[#CD7F32]' : 'bg-slate-800'}`}
+            onClick={() => setIsExpertMode(!isExpertMode)}
+            className={`w-8 h-4 rounded-full relative transition-all ${isExpertMode ? 'bg-[#CD7F32]' : 'bg-slate-800'}`}
           >
-            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${user?.expertMode ? 'left-4.5' : 'left-0.5'}`} />
+            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${isExpertMode ? 'left-4.5' : 'left-0.5'}`} />
           </button>
         </div>
 
@@ -116,6 +116,7 @@ const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnl
 };
 
 const GaugeChart = ({ score }: { score: number }) => {
+  const { isExpertMode } = useContext(AuthContext);
   const data = [
     { name: 'Score', value: score },
     { name: 'Remaining', value: 100 - score },
@@ -147,8 +148,8 @@ const GaugeChart = ({ score }: { score: number }) => {
       <div className="absolute bottom-4 text-center">
         {score > 0 ? (
           <>
-            <span className="text-3xl font-black text-white mono tracking-tighter">{score}%</span>
-            <p className="text-[8px] text-slate-600 font-black uppercase tracking-[0.2em]">Efficiency_Index</p>
+            <span className={`text-3xl font-black mono tracking-tighter ${isExpertMode ? 'text-[#FF4D00]' : 'text-white'}`}>{score}%</span>
+            <p className={`text-[8px] font-black uppercase tracking-[0.2em] ${isExpertMode ? 'text-[#FF4D00]' : 'text-slate-600'}`}>Efficiency_Index</p>
           </>
         ) : (
           <p className="text-[9px] text-[#CD7F32] font-black uppercase tracking-widest px-4 leading-tight opacity-50">Null_Assessment</p>
@@ -251,7 +252,7 @@ const CareerHub = () => {
           <div className="relative z-10">
             <Target size={20} strokeWidth={2} className="text-[#0A0A0A] mb-6" />
             <p className="text-[#0A0A0A]/60 font-black text-[10px] uppercase tracking-widest">Current_Objective</p>
-            <p className="text-xl font-black text-[#0A0A0A] mt-2 leading-tight uppercase tracking-tight">Optimize System Architecture</p>
+            <p className="text-xl font-black text-[#00f2ff] mt-2 leading-tight uppercase tracking-tight">Optimize System Architecture</p>
           </div>
           <div className="absolute -right-4 -bottom-4 opacity-10">
             <Network size={120} />
@@ -353,7 +354,7 @@ const SimulationChamber = () => {
   const [currentQuestion, setCurrentQuestion] = useState("AWAITING_INPUT...");
   const [hardwareError, setHardwareError] = useState<string | null>(null);
   const { resume } = useContext(ResumeContext);
-  const { expertMode } = useContext(AuthContext);
+  const { isExpertMode } = useContext(AuthContext);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -470,13 +471,13 @@ const SimulationChamber = () => {
       const historyContext = pastSessions?.map(s => ({ score: s.score, date: s.created_at })) || [];
 
       const hardContext = "PERSONA: Senior Technical Architect @ Google. FOCUS: AI Engineering & Data Structures. TONE: Industrial, rigorous, objective. TARGET: 9.5 CGPA standard.";
-      const result = await analyzeInterview(transcript, historyContext, `${hardContext} | CONTEXT: ${resume}`, expertMode);
+      const result = await analyzeInterview(transcript, historyContext, `${hardContext} | CONTEXT: ${resume}`, isExpertMode);
 
       const historyItem = {
         transcript, score: result.score, summary: result.summary,
         star_feedback: result.starFeedback, improved_answer: result.improvedAnswer,
         star_scores: result.starScores, next_step: result.nextStep,
-        expert_mode: expertMode,
+        expert_mode: isExpertMode,
         created_at: new Date().toISOString()
       };
 
@@ -798,7 +799,7 @@ function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
   const [resume, setResume] = useState(() => localStorage.getItem('resume_text') || '');
-  const [expertMode, setExpertMode] = useState(false);
+  const [isExpertMode, setIsExpertMode] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -824,7 +825,7 @@ function App() {
   }, [isOnline]);
 
   const login = () => {
-    const mockUser = { name: 'Candidate', expertMode, setExpertMode };
+    const mockUser = { name: 'Candidate', isExpertMode, setIsExpertMode };
     setUser(mockUser);
     localStorage.setItem('user', JSON.stringify(mockUser));
     toast.success("AUTHENTICATION_GRANTED");
@@ -849,7 +850,7 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, expertMode, setExpertMode }}>
+    <AuthContext.Provider value={{ user, login, logout, isExpertMode, setIsExpertMode }}>
       <ResumeContext.Provider value={{ resume, setResume }}>
         <Router>
           <div className="min-h-screen bg-[#0A0A0A] font-sans text-slate-400 selection:bg-[#CD7F32]/30">
