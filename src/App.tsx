@@ -1,16 +1,16 @@
 import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
-import { 
-  BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate 
+import {
+  BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate
 } from 'react-router-dom';
-import { 
-  Camera, Play, Square, MessageSquare, BarChart3, ShieldCheck, 
-  Loader2, Sparkles, Trophy, Target, BookOpen, RefreshCw, 
+import {
+  Camera, Play, Square, MessageSquare, BarChart3, ShieldCheck,
+  Loader2, Sparkles, Trophy, Target, BookOpen, RefreshCw,
   LayoutDashboard, History, Settings, LogOut, ChevronRight,
   TrendingUp, Clock, Award, User, Sun, Moon, AlertCircle, Activity,
   FileText, Zap, Brain, Briefcase, Terminal, Cpu, Database, Network
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   PieChart, Pie, Cell, AreaChart, Area
@@ -20,15 +20,15 @@ import { supabase } from './lib/supabaseClient';
 import toast, { Toaster } from 'react-hot-toast';
 
 // --- CONTEXTS ---
-const ThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
-const AuthContext = createContext({ 
-  user: null, 
-  login: () => {}, 
-  logout: () => {},
+const ThemeContext = createContext({ theme: 'dark', toggleTheme: () => { } });
+const AuthContext = createContext({
+  user: null,
+  login: () => { },
+  logout: () => { },
   expertMode: false,
-  setExpertMode: (val: boolean) => {}
+  setExpertMode: (val: boolean) => { }
 });
-const ResumeContext = createContext({ resume: '', setResume: (val: string) => {} });
+const ResumeContext = createContext({ resume: '', setResume: (val: string) => { } });
 
 const useResume = () => useContext(ResumeContext);
 const useAuth = () => useContext(AuthContext);
@@ -43,7 +43,7 @@ const playSFX = (type: 'start' | 'success' | 'error') => {
   };
   const audio = new Audio(sounds[type]);
   audio.volume = 0.2;
-  audio.play().catch(() => {});
+  audio.play().catch(() => { });
 };
 
 // --- COMPONENTS ---
@@ -69,7 +69,7 @@ const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnl
           </div>
           <span className="text-sm font-black text-white tracking-[0.2em] uppercase">HireSense</span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? (dbConnected ? 'bg-emerald-500' : 'bg-amber-500') : 'bg-red-500'}`} />
           <span className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">
@@ -77,17 +77,16 @@ const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnl
           </span>
         </div>
       </div>
-      
+
       <nav className="flex-1 px-4 space-y-1">
         {navItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
-            className={`flex items-center gap-4 px-4 py-3 rounded-[4px] transition-all text-[11px] font-bold tracking-widest active:scale-[0.98] ${
-              location.pathname === item.path 
-                ? 'bg-[#CD7F32]/10 text-[#CD7F32] border-l-2 border-[#CD7F32]' 
-                : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
-            }`}
+            className={`flex items-center gap-4 px-4 py-3 rounded-[4px] transition-all text-[11px] font-bold tracking-widest active:scale-[0.98] ${location.pathname === item.path
+              ? 'bg-[#CD7F32]/10 text-[#CD7F32] border-l-2 border-[#CD7F32]'
+              : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+              }`}
           >
             <item.icon size={16} strokeWidth={1} />
             {item.name}
@@ -98,7 +97,7 @@ const Sidebar = ({ dbConnected, isOnline }: { dbConnected: boolean | null, isOnl
       <div className="p-4 border-t border-white/5 space-y-4">
         <div className="flex items-center justify-between px-4 py-2 bg-white/5 rounded-[4px] border border-white/5">
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Expert_Mode</span>
-          <button 
+          <button
             onClick={() => user?.setExpertMode(!user?.expertMode)}
             className={`w-8 h-4 rounded-full relative transition-all ${user?.expertMode ? 'bg-[#CD7F32]' : 'bg-slate-800'}`}
           >
@@ -170,7 +169,7 @@ const CareerHub = () => {
         const { data } = await supabase.from('sessions').select('score');
         const local = JSON.parse(localStorage.getItem('local_sessions') || '[]');
         const combined = [...(data || []), ...local];
-        
+
         if (combined.length > 0) {
           const avg = Math.round(combined.reduce((acc: number, curr: any) => acc + curr.score, 0) / combined.length);
           setStats({ avgScore: avg, totalSessions: combined.length, totalMinutes: combined.length * 15 });
@@ -270,11 +269,11 @@ const AnalyticsPage = () => {
       const { data } = await supabase.from('sessions').select('score, created_at').order('created_at', { ascending: true });
       const local = JSON.parse(localStorage.getItem('local_sessions') || '[]');
       const combined = [...(data || []), ...local].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-      
+
       if (combined.length > 0) {
-        setHistory(combined.map(d => ({ 
-          name: new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), 
-          score: d.score 
+        setHistory(combined.map(d => ({
+          name: new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          score: d.score
         })));
       }
     };
@@ -295,14 +294,14 @@ const AnalyticsPage = () => {
             <AreaChart data={history}>
               <defs>
                 <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#CD7F32" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="#CD7F32" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#CD7F32" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#CD7F32" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10, fontWeight: 700 }} />
               <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#444', fontSize: 10, fontWeight: 700 }} />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' }}
                 itemStyle={{ color: '#CD7F32', fontSize: '10px', fontWeight: 'bold' }}
               />
@@ -365,10 +364,10 @@ const SimulationChamber = () => {
     try {
       addLog("> INITIALIZING_HARDWARE_STACK...");
       if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
-      
+
       await new Promise(r => setTimeout(r, 500));
       addLog("> REQUESTING_MEDIA_PERMISSIONS...");
-      
+
       if (!isSecure) {
         addLog("! SECURITY_ERROR: INSECURE_CONTEXT [HTTP]");
         throw new Error("INSECURE_CONTEXT");
@@ -376,12 +375,12 @@ const SimulationChamber = () => {
 
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
-      
+
       addLog("> STREAM_CAPTURE_SUCCESS: [VIDEO_O; AUDIO_O]");
       addLog("> ESTABLISHING_SSL_HANDSHAKE...");
       await new Promise(r => setTimeout(r, 800));
       addLog("> ENCRYPTION_LOCKED: RSA_4096_BIT");
-      
+
       setHasStream(true);
       setIsMockStream(false);
       setHardwareError(null);
@@ -462,15 +461,15 @@ const SimulationChamber = () => {
   const stopInterview = async () => {
     setIsInterviewing(false);
     setIsAnalyzing(true);
-    
+
     try {
       await new Promise(r => setTimeout(r, 2000));
       const { data: pastSessions } = await supabase.from('sessions').select('score, created_at').order('created_at', { ascending: false }).limit(3);
       const historyContext = pastSessions?.map(s => ({ score: s.score, date: s.created_at })) || [];
-      
+
       const hardContext = "PERSONA: Senior Technical Architect @ Google. FOCUS: AI Engineering & Data Structures. TONE: Industrial, rigorous, objective. TARGET: 9.5 CGPA standard.";
       const result = await analyzeInterview(transcript, historyContext, `${hardContext} | CONTEXT: ${resume}`, expertMode);
-      
+
       const historyItem = {
         transcript, score: result.score, summary: result.summary,
         star_feedback: result.starFeedback, improved_answer: result.improvedAnswer,
@@ -506,7 +505,7 @@ const SimulationChamber = () => {
             <div className="p-12 flex flex-col justify-center border-r border-white/5">
               <h2 className="text-3xl font-black text-white mb-2 uppercase italic tracking-tighter">Simulation_Chamber</h2>
               <p className="text-slate-600 text-[10px] mono uppercase tracking-widest mb-10">Module: Technical_Architecture_v4.0</p>
-              
+
               {hardwareError ? (
                 <div className="space-y-4">
                   <button onClick={hardReset} className="w-full bg-red-500/10 text-red-500 border border-red-500/20 px-6 py-4 text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
@@ -517,8 +516,8 @@ const SimulationChamber = () => {
                   </button>
                 </div>
               ) : (
-                <button 
-                  onClick={startInterview} 
+                <button
+                  onClick={startInterview}
                   disabled={!hasStream}
                   className={`bg-[#CD7F32] hover:bg-[#b06d2b] disabled:bg-slate-800 disabled:text-slate-600 text-[#0A0A0A] px-10 py-5 text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-4`}
                 >
@@ -551,7 +550,7 @@ const SimulationChamber = () => {
               </div>
               <Waveform />
             </div>
-            
+
             <div className="absolute bottom-0 left-0 right-0 p-12 bg-gradient-to-t from-black/90 to-transparent">
               <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.3em] mb-4 mono">Transmission_Inbound</p>
               <p className="text-2xl font-black text-white leading-tight uppercase tracking-tight">{currentQuestion}</p>
@@ -563,7 +562,7 @@ const SimulationChamber = () => {
           </>
         )}
       </div>
-      
+
       {isAnalyzing && (
         <div className="fixed inset-0 z-50 bg-[#0A0A0A]/95 backdrop-blur-md flex items-center justify-center">
           <div className="text-center space-y-4">
@@ -652,7 +651,7 @@ const HistoryPage = () => {
                 </div>
                 <button onClick={() => setSelected(null)} className="text-slate-600 hover:text-white mono text-[10px] uppercase font-black tracking-widest">CLOSE_REPORT [X]</button>
               </div>
-              
+
               <div className="space-y-12">
                 <div className="grid grid-cols-3 gap-8">
                   <div className="col-span-1 industrial-card p-8">
@@ -713,7 +712,7 @@ const SettingsPage = () => {
     const text = e.target.value;
     setResume(text);
     localStorage.setItem('resume_text', text);
-    
+
     // Auto-sync to Supabase profile if possible
     setIsSaving(true);
     try {
@@ -748,7 +747,7 @@ const SettingsPage = () => {
               <label className="block text-[#CD7F32] text-[10px] font-black uppercase tracking-[0.3em] mono">User_Context [AI_System_Instruction]</label>
               {isSaving && <Loader2 size={12} className="animate-spin text-[#CD7F32]" />}
             </div>
-            <textarea 
+            <textarea
               value={resume}
               onChange={handleSave}
               placeholder="[Input Candidate background details for AI personalization...]"
@@ -794,106 +793,108 @@ const SettingsPage = () => {
 
 // --- MAIN APP ---
 
+export default function App() {
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
-  const [resume, setResume] = useState(() => localStorage.getItem('resume_text') || '');
-  const [expertMode, setExpertMode] = useState(false);
+const [isOnline, setIsOnline] = useState(navigator.onLine);
+const [user, setUser] = useState<any>(() => JSON.parse(localStorage.getItem('user') || 'null'));
+const [resume, setResume] = useState(() => localStorage.getItem('resume_text') || '');
+const [expertMode, setExpertMode] = useState(false);
 
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  useEffect(() => {
-    const checkDb = async () => {
-      try {
-        const { error } = await supabase.from('sessions').select('id').limit(1);
-        setDbConnected(!error);
-      } catch {
-        setDbConnected(false);
-      }
-    };
-    if (isOnline) checkDb();
-  }, [isOnline]);
-
-  const login = () => {
-    const mockUser = { name: 'Candidate', expertMode, setExpertMode };
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    toast.success("AUTHENTICATION_GRANTED");
+useEffect(() => {
+  const handleOnline = () => setIsOnline(true);
+  const handleOffline = () => setIsOnline(false);
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  return () => {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
   };
+}, []);
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+useEffect(() => {
+  const checkDb = async () => {
+    try {
+      const { error } = await supabase.from('sessions').select('id').limit(1);
+      setDbConnected(!error);
+    } catch {
+      setDbConnected(false);
+    }
   };
+  if (isOnline) checkDb();
+}, [isOnline]);
 
-  // Environment Guard
-  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_GEMINI_API_KEY) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-[#0A0A0A] p-12">
-        <div className="industrial-card p-12 max-w-md w-full border-red-500/20">
-          <AlertCircle size={48} strokeWidth={1} className="text-red-500 mb-8" />
-          <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">Config_Required</h2>
-          <p className="text-slate-600 text-xs mono leading-relaxed uppercase tracking-widest">Missing environment variables. Ensure VITE_SUPABASE_URL and VITE_GEMINI_API_KEY are defined in .env.</p>
-        </div>
-      </div>
-    );
-  }
+const login = () => {
+  const mockUser = { name: 'Candidate', expertMode, setExpertMode };
+  setUser(mockUser);
+  localStorage.setItem('user', JSON.stringify(mockUser));
+  toast.success("AUTHENTICATION_GRANTED");
+};
 
+const logout = () => {
+  setUser(null);
+  localStorage.removeItem('user');
+};
+
+// Environment Guard
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_GEMINI_API_KEY) {
   return (
-    <AuthContext.Provider value={{ user, login, logout, expertMode, setExpertMode }}>
-      <ResumeContext.Provider value={{ resume, setResume }}>
-        <Router>
-          <div className="min-h-screen bg-[#0A0A0A] font-sans text-slate-400 selection:bg-[#CD7F32]/30">
-            <Toaster position="top-right" toastOptions={{
-              style: { background: '#111111', color: '#fff', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' }
-            }} />
-            
-            {user ? (
-              <div className="flex">
-                <Sidebar dbConnected={dbConnected} isOnline={isOnline} />
-                <main className="flex-1 ml-64 p-16 min-h-screen">
-                  <div className="max-w-7xl mx-auto">
-                    <AnimatePresence mode="wait">
-                      <Routes>
-                        <Route path="/" element={<CareerHub />} />
-                        <Route path="/practice" element={<SimulationChamber />} />
-                        <Route path="/analytics" element={<AnalyticsPage />} />
-                        <Route path="/history" element={<HistoryPage />} />
-                        <Route path="/settings" element={<SettingsPage />} />
-                        <Route path="*" element={<Navigate to="/" />} />
-                      </Routes>
-                    </AnimatePresence>
-                  </div>
-                </main>
-              </div>
-            ) : (
-              <div className="h-screen flex items-center justify-center bg-[#0A0A0A]">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="industrial-card p-16 max-w-lg w-full text-center space-y-10">
-                  <div className="w-16 h-16 bg-[#CD7F32] rounded-[4px] flex items-center justify-center mx-auto">
-                    <ShieldCheck size={32} strokeWidth={1.5} className="text-[#0A0A0A]" />
-                  </div>
-                  <div>
-                    <h1 className="text-5xl font-black text-white tracking-[-0.08em] uppercase italic mb-2">HireSense</h1>
-                    <p className="text-slate-600 font-bold text-[10px] mono uppercase tracking-[0.4em]">Enterprise_Intelligence_v4.0</p>
-                  </div>
-                  <button onClick={login} className="w-full bg-[#CD7F32] hover:bg-[#b06d2b] text-[#0A0A0A] py-5 rounded-[4px] font-black text-[11px] uppercase tracking-[0.3em] transition-all active:scale-[0.98] flex items-center justify-center gap-4">
-                    INITIALIZE_UPLINK <ChevronRight size={16} strokeWidth={1} />
-                  </button>
-                </motion.div>
-              </div>
-            )}
-          </div>
-        </Router>
-      </ResumeContext.Provider>
-    </AuthContext.Provider>
+    <div className="h-screen flex items-center justify-center bg-[#0A0A0A] p-12">
+      <div className="industrial-card p-12 max-w-md w-full border-red-500/20">
+        <AlertCircle size={48} strokeWidth={1} className="text-red-500 mb-8" />
+        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">Config_Required</h2>
+        <p className="text-slate-600 text-xs mono leading-relaxed uppercase tracking-widest">Missing environment variables. Ensure VITE_SUPABASE_URL and VITE_GEMINI_API_KEY are defined in .env.</p>
+      </div>
+    </div>
+  );
+}
+
+return (
+  <AuthContext.Provider value={{ user, login, logout, expertMode, setExpertMode }}>
+    <ResumeContext.Provider value={{ resume, setResume }}>
+      <Router>
+        <div className="min-h-screen bg-[#0A0A0A] font-sans text-slate-400 selection:bg-[#CD7F32]/30">
+          <Toaster position="top-right" toastOptions={{
+            style: { background: '#111111', color: '#fff', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' }
+          }} />
+
+          {user ? (
+            <div className="flex">
+              <Sidebar dbConnected={dbConnected} isOnline={isOnline} />
+              <main className="flex-1 ml-64 p-16 min-h-screen">
+                <div className="max-w-7xl mx-auto">
+                  <AnimatePresence mode="wait">
+                    <Routes>
+                      <Route path="/" element={<CareerHub />} />
+                      <Route path="/practice" element={<SimulationChamber />} />
+                      <Route path="/analytics" element={<AnalyticsPage />} />
+                      <Route path="/history" element={<HistoryPage />} />
+                      <Route path="/settings" element={<SettingsPage />} />
+                      <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                  </AnimatePresence>
+                </div>
+              </main>
+            </div>
+          ) : (
+            <div className="h-screen flex items-center justify-center bg-[#0A0A0A]">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="industrial-card p-16 max-w-lg w-full text-center space-y-10">
+                <div className="w-16 h-16 bg-[#CD7F32] rounded-[4px] flex items-center justify-center mx-auto">
+                  <ShieldCheck size={32} strokeWidth={1.5} className="text-[#0A0A0A]" />
+                </div>
+                <div>
+                  <h1 className="text-5xl font-black text-white tracking-[-0.08em] uppercase italic mb-2">HireSense</h1>
+                  <p className="text-slate-600 font-bold text-[10px] mono uppercase tracking-[0.4em]">Enterprise_Intelligence_v4.0</p>
+                </div>
+                <button onClick={login} className="w-full bg-[#CD7F32] hover:bg-[#b06d2b] text-[#0A0A0A] py-5 rounded-[4px] font-black text-[11px] uppercase tracking-[0.3em] transition-all active:scale-[0.98] flex items-center justify-center gap-4">
+                  INITIALIZE_UPLINK <ChevronRight size={16} strokeWidth={1} />
+                </button>
+              </motion.div>
+
+            </div>
+          )}
+        </div>
+      </Router>
+    </ResumeContext.Provider>
+  </AuthContext.Provider>
   );
 }
